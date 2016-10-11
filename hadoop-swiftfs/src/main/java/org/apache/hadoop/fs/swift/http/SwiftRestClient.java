@@ -233,6 +233,11 @@ public final class SwiftRestClient {
   private final int socketTimeout;
 
   /**
+   * Buffer size (KB) of input stream
+   */
+  private final int inputBufferSize;
+
+  /**
    * How long (in milliseconds) between bulk operations
    */
   private final int throttleDelay;
@@ -581,6 +586,9 @@ public final class SwiftRestClient {
                                               + SWIFT_PARTITION_SIZE
                                               + ": " + partSizeKB);
       }
+
+      inputBufferSize = conf.getInt(SWIFT_INPUT_STREAM_BUFFER_SIZE,
+          DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE);
 
       bufferSizeKB = conf.getInt(SWIFT_REQUEST_SIZE,
                                  DEFAULT_SWIFT_REQUEST_SIZE);
@@ -1735,7 +1743,7 @@ public final class SwiftRestClient {
       public HttpBodyContent extractResult(GetMethod method) throws IOException {
         return
           new HttpBodyContent(
-            new HttpInputStreamWithRelease(uri, method), method.getResponseContentLength()
+            new HttpInputStreamWithRelease(uri, method, inputBufferSize), method.getResponseContentLength()
           );
       }
 

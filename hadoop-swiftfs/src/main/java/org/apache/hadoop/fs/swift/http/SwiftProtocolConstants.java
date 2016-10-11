@@ -199,6 +199,17 @@ public class SwiftProtocolConstants {
   public static final String DOT_SERVICE = ".SERVICE-NAME";
 
   /**
+   * The default buffer size for inputStream
+   */
+  public static final int DEFAULT_SWIFT_INPUT_STREAM_BUFFER_SIZE = 4096 * 1024;
+
+  /**
+   * Buffer size for input stream in KB: {@value}
+   */
+  public static final String SWIFT_INPUT_STREAM_BUFFER_SIZE =
+      FS_SWIFT + ".inputstream.buffersize";
+
+  /**
    * Key for passing the container name as a property -not read from the
    * configuration : {@value}
    */

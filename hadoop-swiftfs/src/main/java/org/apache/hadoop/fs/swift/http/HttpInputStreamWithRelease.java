@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.swift.exceptions.SwiftConnectionClosedException;
 import org.apache.hadoop.fs.swift.util.SwiftUtils;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -52,7 +53,9 @@ public class HttpInputStreamWithRelease extends InputStream {
   private volatile boolean released;
   //volatile flag to verify that data is consumed.
   private volatile boolean dataConsumed;
-  private InputStream inStream;
+  private InputStream oldInStream;
+  //Optimize performance
+  private BufferedInputStream inStream;
   /**
    * In debug builds, this is filled in with the construction-time
    * stack, which is then included in logs from the finalize(), method.
@@ -64,7 +67,7 @@ public class HttpInputStreamWithRelease extends InputStream {
    */
   private String reasonClosed = "unopened";
 
-  public HttpInputStreamWithRelease(URI uri, HttpMethod method) throws
+  public HttpInputStreamWithRelease(URI uri, HttpMethod method, int bufferSize) throws
                                                                 IOException {
     this.uri = uri;
     this.method = method;
@@ -73,9 +76,11 @@ public class HttpInputStreamWithRelease extends InputStream {
       throw new IllegalArgumentException("Null 'method' parameter ");
     }
     try {
-      inStream = method.getResponseBodyAsStream();
+      oldInStream = method.getResponseBodyAsStream();
+      inStream = new BufferedInputStream(oldInStream, bufferSize);
     } catch (IOException e) {
-      inStream = new ByteArrayInputStream(new byte[]{});
+      oldInStream = new ByteArrayInputStream(new byte[]{});
+      inStream = new BufferedInputStream(oldInStream, bufferSize);
       throw releaseAndRethrow("getResponseBodyAsStream() in constructor -" + e, e);
     }
   }
