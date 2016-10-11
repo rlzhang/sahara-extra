@@ -1001,7 +1001,7 @@ public class SwiftNativeFileSystemStore {
     try {
       final URI fullUri = new URI(uri.getScheme(),
               uri.getAuthority(),
-              path.toUri().getPath(),
+              SwiftUtils.encodeUrl(path.toUri().getPath()),
               null,
               null);
 

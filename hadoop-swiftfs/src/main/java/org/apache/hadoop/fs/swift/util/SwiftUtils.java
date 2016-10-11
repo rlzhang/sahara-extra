@@ -22,9 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.swift.exceptions.SwiftException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Various utility classes for SwiftFS support
@@ -189,5 +192,24 @@ public final class SwiftUtils {
                                           + buffer.length
                                           + " in " + READ);
     }
-  } 
+  }
+
+  /**
+   * Encode the URL. This extends {@link URLEncoder#encode(String, String)}
+   * with a replacement of + with %20.
+   * @param url URL string
+   * @return an encoded string
+   * @throws SwiftException if the URL cannot be encoded
+   */
+  public static String encodeUrl(String url) throws SwiftException {
+    if (url.matches(".*\\s+.*")) {
+      try {
+        url = URLEncoder.encode(url, "UTF-8");
+        url = url.replaceAll("\\+", "%20").replaceAll("%2F", "/").replace("%3A", ":");
+      } catch (UnsupportedEncodingException e) {
+        throw new SwiftException("failed to encode URI", e);
+      }
+    }
+    return url;
+  }
 }

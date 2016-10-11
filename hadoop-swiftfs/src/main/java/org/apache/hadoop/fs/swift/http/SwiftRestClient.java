@@ -83,7 +83,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Properties;
 
@@ -887,7 +886,7 @@ public final class SwiftRestClient {
       if (object.startsWith("/")) {
         object = object.substring(1);
       }
-      object = encodeUrl(object);
+      object = SwiftUtils.encodeUrl(object);
       dataLocationURI = dataLocationURI.concat("/")
               .concat(path.getContainer())
               .concat("/?prefix=")
@@ -1803,31 +1802,11 @@ public final class SwiftRestClient {
     String dataLocationURI = endpointURI.toString();
     try {
 
-      dataLocationURI = SwiftUtils.joinPaths(dataLocationURI, encodeUrl(path.toUriPath()));
+      dataLocationURI = SwiftUtils.joinPaths(dataLocationURI, SwiftUtils.encodeUrl(path.toUriPath()));
       return new URI(dataLocationURI);
     } catch (URISyntaxException e) {
       throw new SwiftException("Failed to create URI from " + dataLocationURI, e);
     }
-  }
-
-  /**
-   * Encode the URL. This extends {@link URLEncoder#encode(String, String)}
-   * with a replacement of + with %20.
-   * @param url URL string
-   * @return an encoded string
-   * @throws SwiftException if the URL cannot be encoded
-   */
-  private static String encodeUrl(String url) throws SwiftException {
-    if (url.matches(".*\\s+.*")) {
-      try {
-        url = URLEncoder.encode(url, "UTF-8");
-        url = url.replace("+", "%20");
-      } catch (UnsupportedEncodingException e) {
-        throw new SwiftException("failed to encode URI", e);
-      }
-    }
-
-    return url;
   }
 
   /**
